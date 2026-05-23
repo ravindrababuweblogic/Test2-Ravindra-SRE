@@ -2,48 +2,96 @@ import java.util.Scanner;
 
 public class Calculator {
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
+        CalculationInput input = loadInput(args);
 
-        System.out.print("Enter first number: ");
-        double num1 = sc.nextDouble();
+        if (input == null) {
+            return;
+        }
 
-        System.out.print("Enter second number: ");
-        double num2 = sc.nextDouble();
-
-        System.out.println("Choose operation (+, -, *, /): ");
-        char operator = sc.next().charAt(0);
-
-        double result;
-
-        switch (operator) {
+        switch (input.operator) {
             case '+':
-                result = num1 + num2;
-                System.out.println("Result = " + result);
+                System.out.println("Result = " + (input.num1 + input.num2));
                 break;
 
             case '-':
-                result = num1 - num2;
-                System.out.println("Result = " + result);
+                System.out.println("Result = " + (input.num1 - input.num2));
                 break;
 
             case '*':
-                result = num1 * num2;
-                System.out.println("Result = " + result);
+                System.out.println("Result = " + (input.num1 * input.num2));
                 break;
 
             case '/':
-                if (num2 != 0) {
-                    result = num1 / num2;
-                    System.out.println("Result = " + result);
-                } else {
+                if (input.num2 == 0) {
                     System.out.println("Error: Division by zero is not allowed.");
+                    return;
                 }
+                System.out.println("Result = " + (input.num1 / input.num2));
                 break;
 
             default:
-                System.out.println("Invalid operator.");
+                System.out.println("Invalid operator. Supported operators: +, -, *, /");
+        }
+    }
+
+    private static CalculationInput loadInput(String[] args) {
+        String envNum1 = System.getenv("CALCULATOR_NUM1");
+        String envNum2 = System.getenv("CALCULATOR_NUM2");
+        String envOperator = System.getenv("CALCULATOR_OPERATOR");
+
+        if (isPresent(envNum1) && isPresent(envNum2) && isPresent(envOperator)) {
+            return parseInput(envNum1, envNum2, envOperator);
         }
 
-        sc.close();
+        if (args.length >= 3) {
+            return parseInput(args[0], args[1], args[2]);
+        }
+
+        Scanner sc = new Scanner(System.in);
+        try {
+            System.out.print("Enter first number: ");
+            double num1 = sc.nextDouble();
+
+            System.out.print("Enter second number: ");
+            double num2 = sc.nextDouble();
+
+            System.out.println("Choose operation (+, -, *, /): ");
+            char operator = sc.next().charAt(0);
+
+            return new CalculationInput(num1, num2, operator);
+        } catch (Exception ex) {
+            System.out.println("Error: Unable to read calculator input.");
+            return null;
+        } finally {
+            sc.close();
+        }
+    }
+
+    private static boolean isPresent(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+
+    private static CalculationInput parseInput(String num1Value, String num2Value, String operatorValue) {
+        try {
+            double num1 = Double.parseDouble(num1Value.trim());
+            double num2 = Double.parseDouble(num2Value.trim());
+            char operator = operatorValue.trim().charAt(0);
+            return new CalculationInput(num1, num2, operator);
+        } catch (Exception ex) {
+            System.out.println("Error: Invalid input. Use numbers and one of +, -, *, /");
+            return null;
+        }
+    }
+
+    private static class CalculationInput {
+        private final double num1;
+        private final double num2;
+        private final char operator;
+
+        private CalculationInput(double num1, double num2, char operator) {
+            this.num1 = num1;
+            this.num2 = num2;
+            this.operator = operator;
+        }
     }
 }

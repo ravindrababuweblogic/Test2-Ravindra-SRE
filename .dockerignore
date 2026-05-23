@@ -1,0 +1,9 @@
+**/.git
+**/.github
+**/.idea
+**/.vscode
+**/*.class
+**/out
+**/classes
+README.md
+k8s/
