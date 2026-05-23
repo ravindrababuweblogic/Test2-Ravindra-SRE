@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: calculator
+  labels:
+    app: calculator
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: calculator
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: calculator
+          image: calculator:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CALCULATOR_NUM1
+              value: "10"
+            - name: CALCULATOR_NUM2
+              value: "5"
+            - name: CALCULATOR_OPERATOR
+              value: "+"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            capabilities:
+              drop:
+                - ALL
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
